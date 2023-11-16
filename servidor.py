@@ -16,15 +16,17 @@ def handle_tcp_client(client_socket, client_address):
             if not data:
                 break
 
-            print(f"Mensaje recibido: {data.decode('utf-8')}")
-            destinatario, mensaje = map(str.lower, data.decode('utf-8').split(':', 1))
-
-            if destinatario in map(str.lower, clientes_tcp):
-                destinatario_socket = clientes_tcp[destinatario]
-                mensaje_enviar = f"{nombre_cliente}: {mensaje}"
-                destinatario_socket.send(mensaje_enviar.encode('utf-8'))
+            parts = map(str.lower, data.decode('utf-8').split(':', 2))
+            if len(parts) == 3:
+                destinatario, remitente, mensaje = parts
+                if destinatario in map(str.lower, clientes_tcp):
+                    destinatario_socket = clientes_tcp[destinatario]
+                    mensaje_enviar = f"{remitente}: {mensaje}"
+                    destinatario_socket.send(mensaje_enviar.encode('utf-8'))
+                else:
+                    print(f"Error: El cliente {destinatario} no existe.")
             else:
-                print(f"Error: El cliente {destinatario} no existe.")
+                print(f"Mensaje recibido de {nombre_cliente}: {parts[0]}")
 
     except ConnectionResetError:
         print(f"Conexión TCP con {client_address} cerrada por el cliente.")
